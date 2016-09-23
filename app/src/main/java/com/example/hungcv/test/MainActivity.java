@@ -9,9 +9,10 @@ import android.view.View;
 import android.widget.ImageView;
 
 import com.example.hungcv.test.picker.ImagePicker;
+import com.example.hungcv.test.picker.ImagePickerListener;
 import com.example.hungcv.test.picker.PickType;
 
-public class MainActivity extends AppCompatActivity implements ImagePicker.OnPickSuccess {
+public class MainActivity extends AppCompatActivity implements ImagePickerListener {
 
     private static final int IMAGE_WIDTH = 900;
     private static final int IMAGE_HEIGHT = 1400;
@@ -68,8 +69,7 @@ public class MainActivity extends AppCompatActivity implements ImagePicker.OnPic
     }
 
     @Override
-    public void onPickImageSuccess(Uri uri) {
+    public void onPickSuccess(Uri uri) {
         imageView.setImageURI(uri);
     }
-
 }
