@@ -1,21 +1,19 @@
-package com.example.hungcv.test;
+package com.example.hungcv.test.picker;
 
 import android.annotation.TargetApi;
-import android.content.ContentResolver;
 import android.content.ContentUris;
-import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 
+import java.io.File;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Locale;
 
 
 /**
@@ -25,10 +23,6 @@ public class FileUtils {
 
     public static final String JPG_EXTENSION = ".jpeg";
 
-    public static final String NAIL_IMAGE_PREFIX = "NailImage";
-
-    public static final String NAIL_AVATAR_NAME = "NailAvatar" + JPG_EXTENSION;
-
     public static final String TYPE_IMAGE = "image";
 
     public static final String TYPE_VIDEO = "video";
@@ -36,16 +30,7 @@ public class FileUtils {
     public static final String TYPE_AUDIO = "audio";
 
     private static final String JPEG_FILE_PREFIX = "IMG";
-    private static final java.lang.String JPEG_FILE_SUFFIX = ".jpg";
 
-
-    public static String getUniqueImageFilename(boolean isAvatar) {
-        if (isAvatar) {
-            return NAIL_AVATAR_NAME;
-        } else {
-            return NAIL_IMAGE_PREFIX + System.currentTimeMillis() + JPG_EXTENSION;
-        }
-    }
 
     @TargetApi(Build.VERSION_CODES.KITKAT)
     private static String handleKitKatVersion(final Context context, final Uri uri) {
@@ -80,7 +65,6 @@ public class FileUtils {
             final String[] selectionArgs = new String[]{
                     split[1]
             };
-
             return getDataColumn(context, contentUri, selection, selectionArgs);
         }
         return null;
@@ -118,7 +102,6 @@ public class FileUtils {
      */
     public static String getDataColumn(Context context, Uri uri, String selection,
                                        String[] selectionArgs) {
-
         Cursor cursor = null;
         final String column = "_data";
         final String[] projection = {
@@ -161,14 +144,6 @@ public class FileUtils {
      */
     public static boolean isMediaDocument(Uri uri) {
         return "com.android.providers.media.documents".equals(uri.getAuthority());
-    }
-
-    public static Uri createTempUri(Context context) {
-        ContentResolver contentResolver = context.getContentResolver();
-        ContentValues cv = new ContentValues();
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
-        cv.put(MediaStore.Images.Media.TITLE, timeStamp);
-        return contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, cv);
     }
 
     public static String getRealPath(final Context context, final Uri uri) {
@@ -250,5 +225,29 @@ public class FileUtils {
      */
     public static boolean isGooglePhotosUri(Uri uri) {
         return "com.google.android.apps.photos.content".equals(uri.getAuthority());
+    }
+
+    public static File createImageFile() throws IOException {
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = JPEG_FILE_PREFIX + timeStamp + "_";
+        return File.createTempFile(imageFileName, JPG_EXTENSION, getAlbumDir());
+    }
+
+    public static File getAlbumDir() {
+        if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
+            File dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+            File storageDir = new File(dir, "MyAlbum");
+
+            if (!storageDir.mkdirs()) {
+                if (!storageDir.exists()) {
+                    return null;
+                }
+            }
+
+            return storageDir;
+
+        } else {
+            return null;
+        }
     }
 }
